@@ -23,7 +23,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const updatedDb = await saveSubscriptionToDb(subscription)
+    console.log('Received subscription:', JSON.stringify(subscription, null, 2))
+
+    // Validate subscription structure
+    if (!subscription.endpoint) {
+      return NextResponse.json(
+        { error: 'Subscription endpoint is missing!' },
+        { status: 400 }
+      )
+    }
+
+    if (!subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
+      return NextResponse.json(
+        { error: 'Subscription keys are missing or invalid!' },
+        { status: 400 }
+      )
+    }
+
+    // Convert browser PushSubscription to web-push format
+    const subscriptionToSave: PushSubscription = {
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
+      },
+    }
+
+    const updatedDb = await saveSubscriptionToDb(subscriptionToSave)
+
+    console.log('Subscription saved. Total subscriptions:', updatedDb.subscriptions.length)
 
     return NextResponse.json({
       message: 'Subscription saved successfully',

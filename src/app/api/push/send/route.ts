@@ -3,6 +3,11 @@ import { getSubscriptionsFromDb } from '@/utils/db/in-memory-db'
 import webpush from 'web-push'
 import { CONFIG } from '@/config'
 
+// Validate VAPID keys
+if (!CONFIG.PUBLIC_KEY || !CONFIG.PRIVATE_KEY) {
+  console.error('VAPID keys are not set! Make sure .env file exists with NEXT_PUBLIC_VAPID_PUBLIC_KEY and NEXT_PUBLIC_VAPID_PRIVATE_KEY')
+}
+
 webpush.setVapidDetails(
   'mailto:test@example.com',
   CONFIG.PUBLIC_KEY as string,
@@ -30,10 +35,15 @@ export async function POST(request: NextRequest) {
 
     const subscriptions = await getSubscriptionsFromDb()
 
+    console.log('Total subscriptions found:', subscriptions.length)
+    console.log('Subscriptions:', JSON.stringify(subscriptions, null, 2))
+
     if (subscriptions.length === 0) {
       return NextResponse.json({
-        message: 'No subscriptions found',
+        message: 'No subscriptions found. Please subscribe first by clicking "Request permission and subscribe"',
         sent: 0,
+        failed: 0,
+        total: 0,
       })
     }
 
