@@ -1,0 +1,5 @@
+export const CONFIG = {
+  PUBLIC_KEY:
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  PRIVATE_KEY: process.env.NEXT_PUBLIC_VAPID_PRIVATE_KEY,
+}
